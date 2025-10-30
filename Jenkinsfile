@@ -1,15 +1,15 @@
-pipeline{
+pipeline {
     agent any
-    tools{
-        maven 'maven' 
+    tools {
+        maven 'maven'
     }
     environment {
-        DOCKERHUB_CREDENTIALS_ID = 'tests' 
-        DOCKERHUB_USERNAME       = 'nishanth09'
-        IMAGE_NAME               = "${nishanth09}/my-app"
-        CONTAINER_NAME           = "my-app-container"
+        DOCKERHUB_CREDENTIALS_ID = 'tests'
+        DOCKERHUB_USERNAME = 'nishanth09'
+        IMAGE_NAME = "nishanth09/my-app"
+        CONTAINER_NAME = "my-app-container"
     }
-    stages{
+    stages {
         stage('Github src') {
             steps {
                 echo 'Checking out source code...'
@@ -17,10 +17,18 @@ pipeline{
             }
         }
 
-        stage('Build stage'){
-            steps{
+        stage('Debug') {
+            steps {
+                sh 'ls -R'
+            }
+        }
+
+        stage('Build stage') {
+            steps {
                 echo 'Building with Maven...'
-                sh 'mvn clean package'
+                dir('app') {  // Change this if your pom.xml is in another folder or remove if it's at root
+                    sh 'mvn clean package'
+                }
             }
         }
 
@@ -45,10 +53,8 @@ pipeline{
                 script {
                     echo "Pushing image: ${IMAGE_NAME}:${BUILD_NUMBER}"
                     sh "sudo docker push ${IMAGE_NAME}:${BUILD_NUMBER}"
-                    
                     echo "Tagging as 'latest'..."
                     sh "sudo docker tag ${IMAGE_NAME}:${BUILD_NUMBER} ${IMAGE_NAME}:latest"
-                    
                     echo "Pushing 'latest' tag..."
                     sh "sudo docker push ${IMAGE_NAME}:latest"
                 }
@@ -58,7 +64,7 @@ pipeline{
         stage('Remove Local Docker Image') {
             steps {
                 echo "Removing local image: ${IMAGE_NAME}:${BUILD_NUMBER}"
-                sh "sudo docker rmi ${IMAGE_NAME}:${BUILD_NUMBER}"
+                sh "sudo docker rmi ${IMAGE_NAME}:${BUILD_NUMBER} || true"
             }
         }
 
