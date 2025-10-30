@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>MiniKart — sample e-commerce</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="wepage.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="logo">MiniKart</div>
+    <div class="search">
+      <input id="searchInput" type="search" placeholder="Search for products, brands and more" />
+      <button id="searchBtn">Search</button>
+    </div>
+    <div class="cart">
+      <button id="cartBtn">Cart (<span id="cartCount">0</span>)</button>
+    </div>
+  </header>
+
+  <main>
+    <aside class="filters">
+      <h3>Categories</h3>
+      <ul>
+        <li><button class="cat-btn" data-cat="all">All</button></li>
+        <li><button class="cat-btn" data-cat="mobiles">Mobiles</button></li>
+        <li><button class="cat-btn" data-cat="fashion">Fashion</button></li>
+        <li><button class="cat-btn" data-cat="home">Home</button></li>
+      </ul>
+    </aside>
+
+    <section class="product-area">
+      <div class="product-grid" id="productGrid">
+        <!-- JS will render products here -->
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    © MiniKart — demo page
+  </footer>
+
+  <script src="webpage.js"></script>
+</body>
+</html>
