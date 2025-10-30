@@ -6,14 +6,14 @@ pipeline{
     environment {
         DOCKERHUB_CREDENTIALS_ID = 'tests' 
         DOCKERHUB_USERNAME       = 'nishanth09'
-        IMAGE_NAME               = "${env.nishanth09}/my-app"
+        IMAGE_NAME               = "${nishanth09}/my-app"
         CONTAINER_NAME           = "my-app-container"
     }
     stages{
         stage('Github src') {
             steps {
                 echo 'Checking out source code...'
-                git branch: 'master', url: 'https://github.com/nishanth300/webapp'
+                git branch: 'master', url: 'https://github.com/nishanth300/webapp.git'
             }
         }
 
