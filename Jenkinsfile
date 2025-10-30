@@ -13,12 +13,13 @@ pipeline {
         stage('Github src') {
             steps {
                 echo 'Checking out source code...'
-                git branch: 'master', url: 'https://github.com/nishanth300/webapp.git'
+                git branch: 'main', url: 'https://github.com/nishanth300/webapp.git'
             }
         }
 
-        stage('Debug') {
+        stage('Debug workspace') {
             steps {
+                sh 'pwd'
                 sh 'ls -R'
             }
         }
@@ -26,7 +27,7 @@ pipeline {
         stage('Build stage') {
             steps {
                 echo 'Building with Maven...'
-                dir('app') {  // Change this if your pom.xml is in another folder or remove if it's at root
+                dir('.') { // change '.' to your subfolder if pom.xml isn’t in root
                     sh 'mvn clean package'
                 }
             }
@@ -48,29 +49,18 @@ pipeline {
             }
         }
 
-        stage('Tag and Push Docker Image') {
+        stage('Push Docker Image') {
             steps {
                 script {
-                    echo "Pushing image: ${IMAGE_NAME}:${BUILD_NUMBER}"
                     sh "sudo docker push ${IMAGE_NAME}:${BUILD_NUMBER}"
-                    echo "Tagging as 'latest'..."
                     sh "sudo docker tag ${IMAGE_NAME}:${BUILD_NUMBER} ${IMAGE_NAME}:latest"
-                    echo "Pushing 'latest' tag..."
                     sh "sudo docker push ${IMAGE_NAME}:latest"
                 }
             }
         }
 
-        stage('Remove Local Docker Image') {
-            steps {
-                echo "Removing local image: ${IMAGE_NAME}:${BUILD_NUMBER}"
-                sh "sudo docker rmi ${IMAGE_NAME}:${BUILD_NUMBER} || true"
-            }
-        }
-
         stage('Run Container') {
             steps {
-                echo "Running new container ${CONTAINER_NAME} on port 8084..."
                 sh "sudo docker stop ${CONTAINER_NAME} || true"
                 sh "sudo docker rm ${CONTAINER_NAME} || true"
                 sh "sudo docker run -d -p 8084:8080 --name ${CONTAINER_NAME} ${IMAGE_NAME}:latest"
@@ -79,13 +69,13 @@ pipeline {
     }
     post {
         always {
-            echo 'This will always run after the stages are complete.'
+            echo 'Pipeline completed.'
         }
         success {
-            echo 'This will run only if the pipeline succeeds.'
+            echo '✅ Build succeeded!'
         }
         failure {
-            echo 'This will run only if the pipeline fails.'
+            echo '❌ Build failed. Check for pom.xml location.'
         }
     }
 }
