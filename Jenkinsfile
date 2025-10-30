@@ -1,35 +1,27 @@
-pipeline {
+
+pipeline{
     agent any
-    tools {
-        maven 'maven'
+    tools{
+        maven 'maven' 
     }
     environment {
-        DOCKERHUB_CREDENTIALS_ID = 'tests'
-        DOCKERHUB_USERNAME = 'nishanth09'
-        IMAGE_NAME = "nishanth09/my-app"
-        CONTAINER_NAME = "my-app-container"
+        DOCKERHUB_CREDENTIALS_ID = 'tests' 
+        DOCKERHUB_USERNAME       = 'nishanth09'
+        IMAGE_NAME               = "${nishanth09}/my-app"
+        CONTAINER_NAME           = "my-app-container"
     }
-    stages {
+    stages{
         stage('Github src') {
             steps {
                 echo 'Checking out source code...'
-                git branch: 'main', url: 'https://github.com/nishanth300/webapp.git'
+                git branch: 'master', url: 'https://github.com/nishanth300/webapp.git'
             }
         }
 
-        stage('Debug workspace') {
-            steps {
-                sh 'pwd'
-                sh 'ls -R'
-            }
-        }
-
-        stage('Build stage') {
-            steps {
+        stage('Build stage'){
+            steps{
                 echo 'Building with Maven...'
-                dir('.') { // change '.' to your subfolder if pom.xml isn’t in root
-                    sh 'mvn clean package'
-                }
+                sh 'mvn clean package'
             }
         }
 
@@ -49,18 +41,31 @@ pipeline {
             }
         }
 
-        stage('Push Docker Image') {
+        stage('Tag and Push Docker Image') {
             steps {
                 script {
+                    echo "Pushing image: ${IMAGE_NAME}:${BUILD_NUMBER}"
                     sh "sudo docker push ${IMAGE_NAME}:${BUILD_NUMBER}"
+                    
+                    echo "Tagging as 'latest'..."
                     sh "sudo docker tag ${IMAGE_NAME}:${BUILD_NUMBER} ${IMAGE_NAME}:latest"
+                    
+                    echo "Pushing 'latest' tag..."
                     sh "sudo docker push ${IMAGE_NAME}:latest"
                 }
             }
         }
 
+        stage('Remove Local Docker Image') {
+            steps {
+                echo "Removing local image: ${IMAGE_NAME}:${BUILD_NUMBER}"
+                sh "sudo docker rmi ${IMAGE_NAME}:${BUILD_NUMBER}"
+            }
+        }
+
         stage('Run Container') {
             steps {
+                echo "Running new container ${CONTAINER_NAME} on port 8084..."
                 sh "sudo docker stop ${CONTAINER_NAME} || true"
                 sh "sudo docker rm ${CONTAINER_NAME} || true"
                 sh "sudo docker run -d -p 8084:8080 --name ${CONTAINER_NAME} ${IMAGE_NAME}:latest"
@@ -69,13 +74,14 @@ pipeline {
     }
     post {
         always {
-            echo 'Pipeline completed.'
+            echo 'This will always run after the stages are complete.'
         }
         success {
-            echo '✅ Build succeeded!'
+            echo 'This will run only if the pipeline succeeds.'
         }
         failure {
-            echo '❌ Build failed. Check for pom.xml location.'
+            echo 'This will run only if the pipeline fails.'
         }
     }
 }
+ 
